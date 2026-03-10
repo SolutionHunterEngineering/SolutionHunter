@@ -1,0 +1,29 @@
+﻿/* Pinned background inside the page content (not the whole window) */
+.splash-root {
+    position: absolute;     /* anchored by .content { position: relative } */
+    inset: 0;
+    z-index: 0;
+    background: url('/images/SplashPage.jpg') center / cover no-repeat;
+}
+
+/* Non-interactive overlay (optional) */
+.splash-overlay {
+    position: absolute; inset: 0;
+}
+
+/* Only this region scrolls; the page itself never scrolls */
+.table-viewport {
+    position: absolute;
+    left: 16px; right: 16px; top: 16px; bottom: 16px;
+    overflow: auto;
+    background: rgba(255,255,255,.85);
+    border-radius: 8px;
+}
+
+/* Table hygiene */
+.obs-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.obs-table th, .obs-table td {
+    padding: 8px;
+    border-bottom: 1px solid rgba(0,0,0,.1);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}

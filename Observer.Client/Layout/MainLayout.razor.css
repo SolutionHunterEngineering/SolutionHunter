@@ -1,0 +1,14 @@
+﻿/* Shell fills the viewport and stacks: [CommandBar | Content] */
+.app-shell {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* The content area anchors absolute children (e.g., splash) */
+.content {
+    flex: 1 1 auto;
+    position: relative; /* critical: lets splash fill this area */
+    min-height: 0;
+    overflow: hidden; /* pages manage their own scroll regions */
+}

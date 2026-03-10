@@ -1,0 +1,48 @@
+﻿/* Root bar (scoped; no Bootstrap collision) */
+nav.command-bar {
+    /* define vars locally so they always exist */
+    --hunter-green: #0a5746;
+    --hunter-deep:  #083b35;
+
+    position: sticky; top: 0; z-index: 1000;
+    height: 64px; width: 100%;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1.5rem;
+    background: var(--hunter-green);   /* now resolves */
+    color: #fff;
+    border-bottom: 2px solid var(--hunter-deep);
+    box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/* Left/Right clusters */
+nav.command-bar .cb-left  { display:flex; align-items:center; gap:1.25rem; }
+nav.command-bar .cb-right { display:flex; align-items:center; gap:.75rem; }
+
+nav.command-bar .app-title {
+    font-size: 1.45rem; font-weight: 700; letter-spacing: .3px;
+}
+
+/* Inputs */
+nav.command-bar .cb-input {
+    height: 36px; min-width: 190px; padding: 0 .75rem;
+    border: 0; border-radius: 6px;
+    background: #fff; color: #1a1a1a; outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.08);
+}
+nav.command-bar .cb-input::placeholder { color: #6b7280; opacity: 1; }
+
+/* Button uses the same green var defined above */
+nav.command-bar .cb-button {
+    height: 36px; padding: 0 1.25rem;
+    border: 0; border-radius: 8px;
+    background: var(--hunter-green);
+    color: #fff; font-weight: 700; cursor: pointer;
+    box-shadow: 0 1px 0 rgba(0,0,0,.10);
+    transition: transform .15s, filter .15s;
+}
+nav.command-bar .cb-button:hover  { filter: brightness(1.06); }
+nav.command-bar .cb-button:active { transform: translateY(1px); }
+
+.navbaseStyle {
+    background-color: #660033;
+}

@@ -1,0 +1,11 @@
+﻿@inherits LayoutComponentBase
+
+<div class="app-shell">
+    <!-- Fixed command bar (component-local styles) -->
+    <NavBar />
+
+    <!-- Page content lives under the bar and owns its own scrolling -->
+    <div class="content">
+        @Body
+    </div>
+</div>

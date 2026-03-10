@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36518.9
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hunter.Client", "Hunter.Client.csproj", "{02456F0E-9150-47D2-B0BE-73543C05EEE2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Contracts", "..\Contracts\Contracts.csproj", "{DFE9835D-BFDE-0D0C-75EF-CA5F0CBE0DAD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{02456F0E-9150-47D2-B0BE-73543C05EEE2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02456F0E-9150-47D2-B0BE-73543C05EEE2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02456F0E-9150-47D2-B0BE-73543C05EEE2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02456F0E-9150-47D2-B0BE-73543C05EEE2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DFE9835D-BFDE-0D0C-75EF-CA5F0CBE0DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DFE9835D-BFDE-0D0C-75EF-CA5F0CBE0DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DFE9835D-BFDE-0D0C-75EF-CA5F0CBE0DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DFE9835D-BFDE-0D0C-75EF-CA5F0CBE0DAD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C4679060-9ED2-4FC6-9472-BEDFF7D6D417}
+	EndGlobalSection
+EndGlobal

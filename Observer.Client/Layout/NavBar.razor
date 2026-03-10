@@ -1,0 +1,716 @@
+﻿@* Observer.Client/Layout/NavBar.razor *@
+@using Microsoft.AspNetCore.SignalR.Client
+@using Microsoft.Extensions.Configuration
+@using Observer.Client.Services
+@using Observer.Shared.DTOs.Auth
+@using Observer.Shared.DTOs.Hunters
+
+@inject IConfiguration Config
+@inject RealtimeService Realtime
+@inject NavigationManager Nav
+
+<nav class="navbar navbar-expand-lg navbar-dark navbaseStyle">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Observer</a>
+
+        <div class="collapse navbar-collapse" id="navbarMain">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                @* --- Hunter Server Dropdown (ONLY visible once authenticated) --- *@
+                @if (_authenticated)
+                {
+                    <li class="nav-item me-3 position-relative">
+                        <button type="button"
+                                class="hunter-picker-btn @HunterPickerCssClass()"
+                                style="min-width: 260px; margin-left: 20px;"
+                                @onclick="ToggleHunterMenuAsync">
+                            <span class="hunter-picker-text">@HunterPickerLabel()</span>
+                            <span class="hunter-picker-caret">▾</span>
+                        </button>
+
+                        @if (_hunterMenuOpen)
+                        {
+                            <div class="hunter-menu-shield" @onclick="CloseAllMenus"></div>
+
+                            <div class="hunter-menu">
+                                <div class="hunter-menu-header">
+                                    <span>Hunter Servers</span>
+
+                                    <button type="button"
+                                            class="hunter-menu-refresh"
+                                            title="Refresh health"
+                                            @onclick="ForceRefreshHunterHealthAsync">
+                                        ↻
+                                    </button>
+                                </div>
+
+                                <div class="hunter-menu-body">
+                                    @if (_hunterServers.Count == 0)
+                                    {
+                                        <div class="hunter-empty">
+                                            No Hunter servers loaded.
+                                        </div>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var row in _hunterServers)
+                                        {
+                                            var st = GetStatus(row.ServerId);
+                                            var isAvailable = st == HunterStatus.Reachable;
+
+                                            <button type="button"
+                                                    class="hunter-row @HunterRowCss(st)"
+                                                    disabled="@(!isAvailable)"
+                                                    title="@(isAvailable ? "Select this Hunter" : "Unavailable")"
+                                                    @onclick="() => SelectHunterAndCloseAsync(row.ServerId)">
+                                                <span class="hunter-dot @HunterDotCss(st)"></span>
+                                                <span class="hunter-row-name">@row.DisplayName</span>
+                                                <span class="hunter-row-status">@StatusLabel(st)</span>
+                                            </button>
+                                        }
+                                    }
+                                </div>
+
+                                <div class="hunter-menu-footer">
+                                    <span class="hunter-footer-hint">
+                                        (Status updates every 10 seconds while this menu is open.)
+                                    </span>
+                                </div>
+                            </div>
+                        }
+                    </li>
+
+                    @* --- NEW: Placeholder dropdowns to the right of Hunter picker (login-only) --- *@
+                    <li class="nav-item me-2 position-relative">
+                        <button type="button"
+                                class="hunter-picker-btn hunter-picker-neutral"
+                                style="min-width: 190px;"
+                                @onclick="ToggleProblemMessagingMenu">
+                            <span class="hunter-picker-text">Problem Messaging</span>
+                            <span class="hunter-picker-caret">▾</span>
+                        </button>
+
+                        @if (_problemMessagingMenuOpen)
+                        {
+                            <div class="hunter-menu-shield" @onclick="CloseAllMenus"></div>
+
+                            <div class="hunter-menu" style="width: 260px;">
+                                <div class="hunter-menu-header">
+                                    <span>Problem Messaging</span>
+                                </div>
+
+                                <div class="hunter-menu-body">
+                                    <div class="hunter-empty">Coming soon.</div>
+                                </div>
+                            </div>
+                        }
+                    </li>
+
+                    <li class="nav-item me-2 position-relative">
+                        <button type="button"
+                                class="hunter-picker-btn hunter-picker-neutral"
+                                style="min-width: 175px;"
+                                @onclick="ToggleVersionGhostingMenu">
+                            <span class="hunter-picker-text">Version Ghosting</span>
+                            <span class="hunter-picker-caret">▾</span>
+                        </button>
+
+                        @if (_versionGhostingMenuOpen)
+                        {
+                            <div class="hunter-menu-shield" @onclick="CloseAllMenus"></div>
+
+                            <div class="hunter-menu" style="width: 260px;">
+                                <div class="hunter-menu-header">
+                                    <span>Version Ghosting</span>
+                                </div>
+
+                                <div class="hunter-menu-body">
+                                    <div class="hunter-empty">Coming soon.</div>
+                                </div>
+                            </div>
+                        }
+                    </li>
+
+                    <li class="nav-item me-2 position-relative">
+                        <button type="button"
+                                class="hunter-picker-btn hunter-picker-neutral"
+                                style="min-width: 150px;"
+                                @onclick="ToggleTestManagerMenu">
+                            <span class="hunter-picker-text">Test Manager</span>
+                            <span class="hunter-picker-caret">▾</span>
+                        </button>
+
+                        @if (_testManagerMenuOpen)
+                        {
+                            <div class="hunter-menu-shield" @onclick="CloseAllMenus"></div>
+
+                            <div class="hunter-menu" style="width: 260px;">
+                                <div class="hunter-menu-header">
+                                    <span>Test Manager</span>
+                                </div>
+
+                                <div class="hunter-menu-body">
+                                    <div class="hunter-empty">Coming soon.</div>
+                                </div>
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+
+            <div class="ms-auto d-flex align-items-center gap-2">
+                @if (!_authenticated)
+                {
+                    <input class="form-control form-control-sm"
+                           placeholder="User"
+                           @bind="_user" @bind:event="oninput"
+                           style="width:10rem" />
+
+                    <input class="form-control form-control-sm"
+                           placeholder="Password"
+                           type="password"
+                           @bind="_pw" @bind:event="oninput"
+                           style="width:10rem" />
+
+                    <button class="btn btn-sm btn-primary"
+                            @onclick="LoginAsync"
+                            disabled="@IsLoginDisabled">
+                        Login
+                    </button>
+                }
+                else
+                {
+                    <span class="text-light me-2">Welcome @_currentUser</span>
+
+                    <button class="btn btn-sm btn-outline-light"
+                            @onclick="LogoutAsync">
+                        Logout
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</nav>
+
+@code
+{
+    private HubConnection? _authHub;
+    private HubConnection? _observerHub;
+
+    private bool _authenticated;
+    private bool _isProcessingAuth;
+
+    private string _jwt = "";
+    private string _currentUser = "";
+    private string _status = "";
+
+    private string _user = "";
+    private string _pw = "";
+
+    private bool _hunterMenuOpen;
+
+    // NEW: placeholder menus (login-only)
+    private bool _problemMessagingMenuOpen;
+    private bool _versionGhostingMenuOpen;
+    private bool _testManagerMenuOpen;
+
+    // Refresh throttling (client-side TTL gates)
+    private DateTime _hunterLastFetchedUtc = DateTime.MinValue;
+    private static readonly TimeSpan HunterListTtl = TimeSpan.FromSeconds(15);
+
+    private DateTime _hunterHealthLastFetchedUtc = DateTime.MinValue;
+    private static readonly TimeSpan HunterHealthTtl = TimeSpan.FromSeconds(10);
+
+    // 10-second polling loop while dropdown is open
+    private CancellationTokenSource? _hunterPingLoopCts;
+    private Task? _hunterPingLoopTask;
+
+    // Local matching shape for server list (server returns JSON; binding matches property names)
+    private sealed class HunterServerRow
+    {
+        public string ServerId { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        public string BaseUrl { get; set; } = "";
+    }
+
+    private enum HunterStatus
+    {
+        Unknown = 0,
+        Reachable = 1,
+        Unavailable = 2
+    }
+
+    private readonly List<HunterServerRow> _hunterServers = new();
+    private readonly Dictionary<string, HunterStatus> _hunterStatus = new(StringComparer.OrdinalIgnoreCase);
+
+    private string _selectedHunterServerId = "";
+
+    private bool IsLoginDisabled => _isProcessingAuth
+                                   || (_user?.Length < 5)
+                                   || (_pw?.Length < 10);
+
+    protected override async Task OnInitializedAsync()
+    {
+        await EnsureAuthHubAsync();
+    }
+
+    private string ApiBase => Config["App:ObserverApiBaseUrl"] ?? "https://localhost:7288";
+
+    private async Task ToggleHunterMenuAsync()
+    {
+        var opening = !_hunterMenuOpen;
+        CloseAllMenus();
+        _hunterMenuOpen = opening;
+
+        if (opening)
+        {
+            // If the currently selected server is dead, keep showing it as "(Unavailable)"
+            // UNTIL the user opens the dropdown. Then we clear selection so the top box becomes "Select Active Server".
+            if (!string.IsNullOrWhiteSpace(_selectedHunterServerId) &&
+                GetStatus(_selectedHunterServerId) != HunterStatus.Reachable)
+            {
+                _selectedHunterServerId = "";
+            }
+
+            await OnHunterDropdownOpenedAsync();
+            StartHunterPingLoop();
+        }
+        else
+        {
+            StopHunterPingLoop();
+        }
+    }
+
+    private void ToggleProblemMessagingMenu()
+    {
+        var opening = !_problemMessagingMenuOpen;
+        CloseAllMenus();
+        _problemMessagingMenuOpen = opening;
+    }
+
+    private void ToggleVersionGhostingMenu()
+    {
+        var opening = !_versionGhostingMenuOpen;
+        CloseAllMenus();
+        _versionGhostingMenuOpen = opening;
+    }
+
+    private void ToggleTestManagerMenu()
+    {
+        var opening = !_testManagerMenuOpen;
+        CloseAllMenus();
+        _testManagerMenuOpen = opening;
+    }
+
+    private void CloseAllMenus()
+    {
+        _hunterMenuOpen = false;
+        _problemMessagingMenuOpen = false;
+        _versionGhostingMenuOpen = false;
+        _testManagerMenuOpen = false;
+
+        StopHunterPingLoop();
+    }
+
+    private async Task OnHunterDropdownOpenedAsync()
+    {
+        await RefreshHunterServersAsync(force: false);
+        await RefreshHunterHealthAsync(force: true);
+    }
+
+    private void StartHunterPingLoop()
+    {
+        StopHunterPingLoop();
+
+        _hunterPingLoopCts = new CancellationTokenSource();
+        var ct = _hunterPingLoopCts.Token;
+
+        _hunterPingLoopTask = Task.Run(async () =>
+        {
+            try
+            {
+                using var timer = new PeriodicTimer(TimeSpan.FromSeconds(10));
+
+                while (!ct.IsCancellationRequested)
+                {
+                    if (!_hunterMenuOpen || !_authenticated)
+                        break;
+
+                    // Don’t spam: RefreshHunterHealthAsync has its own TTL anyway.
+                    await InvokeAsync(async () =>
+                    {
+                        if (_hunterMenuOpen && _authenticated)
+                            await RefreshHunterHealthAsync(force: false);
+                    });
+
+                    if (!await timer.WaitForNextTickAsync(ct))
+                        break;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
+            catch
+            {
+                // swallow loop errors; UI refresh will recover on next open/manual refresh
+            }
+        }, ct);
+    }
+
+    private void StopHunterPingLoop()
+    {
+        try
+        {
+            _hunterPingLoopCts?.Cancel();
+        }
+        catch { /* ignore */ }
+
+        _hunterPingLoopCts?.Dispose();
+        _hunterPingLoopCts = null;
+        _hunterPingLoopTask = null;
+    }
+
+    private async Task ForceRefreshHunterHealthAsync()
+    {
+        _hunterHealthLastFetchedUtc = DateTime.MinValue;
+        await RefreshHunterHealthAsync(force: true);
+    }
+
+    private HunterStatus GetStatus(string serverId)
+    {
+        if (string.IsNullOrWhiteSpace(serverId))
+            return HunterStatus.Unavailable;
+
+        return _hunterStatus.TryGetValue(serverId, out var st)
+            ? st
+            : HunterStatus.Unavailable;
+    }
+
+    private string HunterPickerLabel()
+    {
+        // Neutral state before selection
+        if (string.IsNullOrWhiteSpace(_selectedHunterServerId))
+            return "Select Active Server";
+
+        var row = _hunterServers.FirstOrDefault(x => x.ServerId == _selectedHunterServerId);
+        var name = row?.DisplayName ?? _selectedHunterServerId;
+
+        var st = GetStatus(_selectedHunterServerId);
+        if (st != HunterStatus.Reachable)
+            return $"{name} (Unavailable)";
+
+        return name;
+    }
+
+    private string StatusLabel(HunterStatus s) =>
+        s == HunterStatus.Reachable ? "Online" : "Unavailable";
+
+    private string HunterPickerCssClass()
+    {
+        if (string.IsNullOrWhiteSpace(_selectedHunterServerId))
+            return "hunter-picker-neutral";
+
+        var st = GetStatus(_selectedHunterServerId);
+
+        return st switch
+        {
+            HunterStatus.Reachable => "hunter-picker-selected",
+            _ => "hunter-picker-dead"
+        };
+    }
+
+    private string HunterRowCss(HunterStatus st) =>
+        st == HunterStatus.Reachable ? "hunter-row-reachable" : "hunter-row-unreachable";
+
+    private string HunterDotCss(HunterStatus st) =>
+        st == HunterStatus.Reachable ? "hunter-dot-reachable" : "hunter-dot-unreachable";
+
+    private async Task SelectHunterAndCloseAsync(string serverId)
+    {
+        // Rows are disabled when unavailable, but keep the guard anyway.
+        if (GetStatus(serverId) != HunterStatus.Reachable)
+        {
+            _status = "Please select an available server.";
+            StateHasChanged();
+            return;
+        }
+
+        _selectedHunterServerId = serverId;
+        _hunterMenuOpen = false;
+        StopHunterPingLoop();
+
+        // Keep your existing selection behavior (handshake)
+        await OnHunterChangedAsync(new ChangeEventArgs { Value = serverId });
+    }
+
+    // -------------------- EXISTING HUB LOGIC (PRESERVED) --------------------
+
+    private async Task RefreshHunterHealthAsync(bool force)
+    {
+        if (!_authenticated)
+            return;
+
+        if (!force && (DateTime.UtcNow - _hunterHealthLastFetchedUtc) < HunterHealthTtl)
+            return;
+
+        try
+        {
+            await EnsureObserverHubsAsync();
+
+            var rows = await _observerHub!.InvokeAsync<List<HunterHealthDto>>(
+                "GetHunterHealth",
+                HunterHealthTtl);
+
+            foreach (var r in rows)
+            {
+                if (string.IsNullOrWhiteSpace(r.ServerId))
+                    continue;
+
+                _hunterStatus[r.ServerId] = r.IsHealthy
+                    ? HunterStatus.Reachable
+                    : HunterStatus.Unavailable;
+            }
+
+            _hunterHealthLastFetchedUtc = DateTime.UtcNow;
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _status = $"Health check failed: {ex.Message}";
+        }
+    }
+
+    private async Task EnsureAuthHubAsync()
+    {
+        if (_authHub is null)
+        {
+            _authHub = new HubConnectionBuilder()
+                .WithUrl($"{ApiBase.TrimEnd('/')}/hubs/auth")
+                .WithAutomaticReconnect()
+                .Build();
+
+            _authHub.Reconnecting += ex =>
+            {
+                _status = "Auth hub reconnecting…";
+                InvokeAsync(StateHasChanged);
+                return Task.CompletedTask;
+            };
+
+            _authHub.Reconnected += _ =>
+            {
+                _status = "Auth hub reconnected.";
+                InvokeAsync(StateHasChanged);
+                return Task.CompletedTask;
+            };
+
+            _authHub.Closed += async ex =>
+            {
+                _status = "Auth hub disconnected.";
+                await InvokeAsync(StateHasChanged);
+            };
+        }
+
+        if (_authHub.State == HubConnectionState.Connected)
+            return;
+
+        await _authHub.StartAsync();
+    }
+
+    private async Task EnsureObserverHubsAsync()
+    {
+        if (_observerHub is not null &&
+            (_observerHub.State == HubConnectionState.Connected ||
+             _observerHub.State == HubConnectionState.Connecting))
+            return;
+
+        if (string.IsNullOrWhiteSpace(_jwt))
+            throw new InvalidOperationException("No JWT is available for observer hub connection.");
+
+        _observerHub = new HubConnectionBuilder()
+            .WithUrl($"{ApiBase.TrimEnd('/')}/hubs/observer", o =>
+            {
+                o.AccessTokenProvider = () => Task.FromResult(_jwt)!;
+            })
+            .WithAutomaticReconnect()
+            .Build();
+
+        _observerHub.Reconnecting += ex =>
+        {
+            _status = "Observer hub reconnecting…";
+            InvokeAsync(StateHasChanged);
+            return Task.CompletedTask;
+        };
+
+        _observerHub.Reconnected += _ =>
+        {
+            _status = "Observer hub reconnected.";
+            InvokeAsync(StateHasChanged);
+            return Task.CompletedTask;
+        };
+
+        _observerHub.Closed += async ex =>
+        {
+            _status = "Observer hub disconnected.";
+            await InvokeAsync(StateHasChanged);
+        };
+
+        await _observerHub.StartAsync();
+    }
+
+    private async Task RefreshHunterServersAsync(bool force)
+    {
+        if (!_authenticated)
+            return;
+
+        var now = DateTime.UtcNow;
+        if (!force && (now - _hunterLastFetchedUtc) < HunterListTtl)
+            return;
+
+        try
+        {
+            await EnsureObserverHubsAsync();
+
+            var rows = await _observerHub!.InvokeAsync<List<HunterServerRow>>("GetHunterServers");
+
+            _hunterServers.Clear();
+            _hunterServers.AddRange(rows);
+
+            _hunterLastFetchedUtc = now;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _status = $"Hunter list refresh failed: {ex.Message}";
+        }
+    }
+
+    private async Task LoginAsync()
+    {
+        _isProcessingAuth = true;
+        _status = "Logging in…";
+
+        try
+        {
+            await EnsureAuthHubAsync();
+
+            var res = await _authHub!.InvokeAsync<AuthResponse>("Login", new LoginRequest(_user.Trim(), _pw));
+
+            if (!res.Success)
+            {
+                _status = res.Error ?? "Login failed.";
+                return;
+            }
+
+            _jwt = res.Jwt;
+            _authenticated = true;
+            _currentUser = res.UserName;
+            _status = "Logged in.";
+
+            await EnsureObserverHubsAsync();
+            await RefreshHunterServersAsync(force: true);
+
+            _hunterHealthLastFetchedUtc = DateTime.MinValue;
+            await RefreshHunterHealthAsync(force: true);
+        }
+        catch (Exception ex)
+        {
+            _status = $"Login error: {ex.Message}";
+            _authenticated = false;
+            _jwt = "";
+        }
+        finally
+        {
+            _isProcessingAuth = false;
+        }
+    }
+
+    private async Task LogoutAsync()
+    {
+        _isProcessingAuth = true;
+
+        try
+        {
+            CloseAllMenus();
+
+            if (_observerHub is not null && _observerHub.State == HubConnectionState.Connected)
+            {
+                try { await _observerHub.InvokeAsync("Logout"); }
+                catch { /* ignore */ }
+            }
+
+            if (_observerHub is not null)
+            {
+                try { await _observerHub.StopAsync(); } catch { /* ignore */ }
+                await _observerHub.DisposeAsync();
+                _observerHub = null;
+            }
+
+            if (_authHub is not null)
+            {
+                try { await _authHub.StopAsync(); } catch { /* ignore */ }
+            }
+
+            _authenticated = false;
+            _jwt = "";
+            _currentUser = "";
+            _user = "";
+            _pw = "";
+
+            _selectedHunterServerId = "";
+            _hunterServers.Clear();
+            _hunterStatus.Clear();
+            _hunterMenuOpen = false;
+
+            _hunterLastFetchedUtc = DateTime.MinValue;
+            _hunterHealthLastFetchedUtc = DateTime.MinValue;
+
+            _status = "Logged out.";
+        }
+        catch (Exception ex)
+        {
+            _status = $"Logout error: {ex.Message}";
+        }
+        finally
+        {
+            _isProcessingAuth = false;
+        }
+    }
+
+    private async Task OnHunterChangedAsync(ChangeEventArgs e)
+    {
+        var newId = e?.Value?.ToString() ?? "";
+        _selectedHunterServerId = newId;
+
+        if (string.IsNullOrWhiteSpace(newId))
+            return;
+
+        if (!_authenticated)
+            return;
+
+        _status = "Handshaking…";
+
+        try
+        {
+            await EnsureObserverHubsAsync();
+
+            var ok = await _observerHub!.InvokeAsync<bool>("SelectHunterAndHandshake", newId);
+
+            _hunterStatus[newId] = ok ? HunterStatus.Reachable : HunterStatus.Unavailable;
+
+            if (!ok)
+                _selectedHunterServerId = ""; // must select available
+
+            _status = ok ? "Hunter is reachable." : "Hunter is unavailable.";
+        }
+        catch (Exception ex)
+        {
+            _hunterStatus[newId] = HunterStatus.Unavailable;
+            _selectedHunterServerId = ""; // must select available
+            _status = $"Handshake failed: {ex.Message}";
+        }
+
+        StateHasChanged();
+    }
+}

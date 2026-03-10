@@ -1,0 +1,29 @@
+﻿@page "/http-echo"
+@inject HttpClient Http
+
+<h3>HTTP Echo Test</h3>
+
+<input @bind="msg" />
+<button @onclick="CallEcho">Call Echo</button>
+
+<pre>@result</pre>
+
+@code {
+    string msg = "hello";
+    string? result;
+
+    // Use your API HTTPS URL
+    string apiBase = "https://localhost:7273"; // replace with your API https port
+
+    async Task CallEcho()
+    {
+        try
+        {
+            result = await Http.GetStringAsync($"{apiBase}/api/echo/{Uri.EscapeDataString(msg)}");
+        }
+        catch (Exception ex)
+        {
+            result = ex.Message;
+        }
+    }
+}
