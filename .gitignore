@@ -1,0 +1,47 @@
+.git_old/
+
+# Build output
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.rsuser
+
+# Rider
+**/.idea/
+
+# NuGet
+*.nupkg
+**/packages/
+!**/packages/build/
+
+# ASP.NET
+**/wwwroot/dist/
+
+# Blazor WASM
+**/wwwroot/_framework/
+
+# Secrets & environment-specific config
+appsettings.QueenBee.json
+appsettings.WorkerBee.json
+appsettings.Production.json
+**/secrets.json
+
+# Chuck's snapshot/utility files
+Todayls*.txt
+CleanBinObj.ps1
+
+# OS junk
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
+**/logs/
+```

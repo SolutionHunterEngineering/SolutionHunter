@@ -1,0 +1,234 @@
+﻿/* =========================================================
+   Base navbar styling
+   ========================================================= */
+
+.navbaseStyle {
+    background-color: #660033;
+}
+
+/* =========================================================
+   Hunter picker button (top-level dropdown button)
+   ========================================================= */
+
+.hunter-picker-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 6px 10px;
+    border-radius: 6px;
+
+    border: 1px solid rgba(0, 0, 0, 0.25);
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.hunter-picker-text {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hunter-picker-caret {
+    opacity: 0.8;
+}
+
+/* Picker states */
+
+/* Before selection: white bg, black text */
+.hunter-picker-neutral {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.hunter-picker-neutral .hunter-picker-text {
+    color: #000000;
+}
+
+/* Selected + reachable: DarkGreen bg + Gold text */
+.hunter-picker-selected {
+    background-color: #006400; /* DarkGreen */
+    color: #ffffff;
+    border-color: #006400;
+}
+
+.hunter-picker-selected .hunter-picker-text {
+    color: #ffd700; /* Gold */
+    font-weight: 700;
+}
+
+/* Selected server is dead: light gray bg + black text */
+.hunter-picker-dead {
+    background-color: rgb(204, 204, 204);
+    color: #000000;
+    border-color: rgba(0, 0, 0, 0.25);
+}
+
+.hunter-picker-dead .hunter-picker-text {
+    color: #000000;
+    font-weight: 700;
+}
+
+/* =========================================================
+   Dropdown container & shield
+   ========================================================= */
+
+.hunter-menu-shield {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+}
+
+.hunter-menu {
+    position: absolute;
+    z-index: 1001;
+
+    margin-top: 6px;
+    width: 420px;
+
+    background-color: #ffffff;
+    color: #000000;
+
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.25);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+/* =========================================================
+   Dropdown header / footer
+   ========================================================= */
+
+.hunter-menu-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 8px 12px;
+    font-weight: 600;
+
+    background-color: #f3f3f3;
+    border-bottom: 1px solid #cccccc;
+}
+
+.hunter-menu-footer {
+    padding: 6px 12px;
+    font-size: 0.75rem;
+    color: #666666;
+
+    border-top: 1px solid #cccccc;
+}
+
+.hunter-menu-refresh {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* =========================================================
+   Dropdown body
+   ========================================================= */
+
+.hunter-menu-body {
+    max-height: 320px;
+    overflow-y: auto;
+}
+
+.hunter-empty {
+    padding: 10px 12px;
+    color: #666666;
+}
+
+/* =========================================================
+   Server rows
+   ========================================================= */
+
+.hunter-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    width: 100%;
+    padding: 8px 12px;
+
+    border: none;
+    text-align: left;
+}
+
+/* Hover only for enabled rows */
+.hunter-row:not(:disabled):hover {
+    filter: brightness(1.05);
+    cursor: pointer;
+}
+
+/* Disabled rows should not look clickable */
+.hunter-row:disabled {
+    cursor: not-allowed;
+    opacity: 1; /* keep readable */
+}
+
+/* ---- Reachable (Available) ----
+   DodgerBlue background with Bisque text
+*/
+.hunter-row-reachable {
+    background-color: #1e90ff; /* DodgerBlue */
+}
+
+.hunter-row-reachable .hunter-row-name {
+    color: #ffe4c4; /* Bisque */
+    font-weight: 700;
+}
+
+.hunter-row-reachable .hunter-row-status {
+    color: #ffe4c4; /* Bisque */
+    font-weight: 700;
+}
+
+/* ---- Unavailable ----
+   Light gray background, black text
+*/
+.hunter-row-unreachable {
+    background-color: rgb(204, 204, 204);
+}
+
+.hunter-row-unreachable .hunter-row-name,
+.hunter-row-unreachable .hunter-row-status {
+    color: #000000;
+    font-weight: 700;
+}
+
+/* =========================================================
+   Status dot
+   ========================================================= */
+
+.hunter-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.hunter-dot-reachable {
+    background-color: #2ecc71; /* green */
+}
+
+.hunter-dot-unreachable {
+    background-color: #666666; /* dark gray dot */
+}
+
+/* =========================================================
+   Row text
+   ========================================================= */
+
+.hunter-row-name {
+    flex-grow: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.hunter-row-status {
+    font-size: 0.85rem;
+    opacity: 0.95;
+}

@@ -1,0 +1,46 @@
+﻿{
+  "Servers": [
+    {
+      "Name": "Observer",
+      "Roles": [ "Admin", "Engineer", "Viewer" ],
+      "Users": [
+        {
+          "UserName": "Admin",
+          "SeedPassword": "Test$12345",
+          "Roles": [ "Admin", "Engineer" ],
+          "Organization": "Solution Hunter Engineering",
+          "FirstName": "System",
+          "LastName": "Administrator",
+          "KnownAs": "Admin",
+          "Email": "admin@InternalSys.com",
+          "PhoneNumber": "(888) 555-1212",
+          "AltPhone": "(888) 555-1212",
+          "City": "Boston",
+          "State": "Massachusetts",
+          "Country": "USA",
+          "ZipCode": "00000",
+          "Question": "Just say 'none'",
+          "Answer": "none"
+        },
+        {
+          "UserName": "Chuck",
+          "SeedPassword": "Test$12345",
+          "Roles": [ "Admin", "Engineer" ],
+          "Organization": "Solution Hunter Engineering",
+          "FirstName": "Charles",
+          "LastName": "Duncan",
+          "KnownAs": "Chuck",
+          "Email": "cduncan@TheBostonDuncans.com",
+          "PhoneNumber": "(978) 766-9135",
+          "AltPhone": "(888) 555-1212",
+          "City": "Littleton",
+          "State": "Massachusetts",
+          "Country": "USA",
+          "ZipCode": "01460-2222",
+          "Question": "Father's Middle Name",
+          "Answer": "Alonzo"
+        }
+      ]
+    }
+  ]
+}

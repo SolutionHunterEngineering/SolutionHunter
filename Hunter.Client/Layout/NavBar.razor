@@ -1,0 +1,154 @@
+﻿@using Microsoft.AspNetCore.SignalR.Client
+@using Hunter.Shared.DTOs.Auth
+@inject IConfiguration Config
+
+<nav class="navbar navbar-expand-lg navbar-dark navbaseStyle">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Solution Hunter Discovery</a>
+
+        <div class="ms-auto d-flex align-items-center gap-2">
+            @if (!authenticated)
+            {
+                <input class="form-control form-control-sm"
+                       placeholder="User"
+                       @bind="_user" @bind:event="oninput"
+                       style="width:10rem" />
+
+                <input class="form-control form-control-sm"
+                       placeholder="Password"
+                       type="password"
+                       @bind="_pw" @bind:event="oninput"
+                       style="width:10rem" />
+
+                <button class="btn btn-sm btn-primary"
+                        @onclick="DoLogin"
+                        disabled="@(!CanLogin)">
+                    Login
+                </button>
+            }
+            else
+            {
+                <span class="text-light">
+                    Welcome @_currentUser
+                </span>
+
+                <button class="btn btn-sm btn-outline-light"
+                        @onclick="DoLogout">
+                    Logout
+                </button>
+
+                @* Future: Hunter-specific dropdowns / menus live here *@
+            }
+        </div>
+    </div>
+</nav>
+
+@code {
+    private string _user = string.Empty;
+    private string _pw = string.Empty;
+
+    private bool authenticated;
+
+    private string _currentUser = string.Empty;
+    private string _jwt = string.Empty;
+
+    private HubConnection? _authHub;
+
+    // Read API base from config (fallback to localhost:7273)
+    private string ApiBase => Config["HunterServer:BaseUrl"] ?? "https://localhost:7273";
+
+    private bool CanLogin =>
+        !string.IsNullOrWhiteSpace(_user) && _user.Length >= 5 &&
+        !string.IsNullOrWhiteSpace(_pw) && _pw.Length >= 7;
+
+    private async Task EnsureAuthHubAsync()
+    {
+        if (_authHub is not null &&
+            (_authHub.State == HubConnectionState.Connected ||
+             _authHub.State == HubConnectionState.Connecting))
+            return;
+
+        _authHub = new HubConnectionBuilder()
+            .WithUrl($"{ApiBase}/hubs/auth") // matches server MapHub<AuthHub>("/hubs/auth")
+            .WithAutomaticReconnect()
+            .Build();
+
+        await _authHub.StartAsync();
+    }
+
+    private async Task DoLogin()
+    {
+        if (!CanLogin) return;
+
+        StateHasChanged();
+
+        try
+        {
+            await EnsureAuthHubAsync();
+
+            var req = new LoginRequest(_user.Trim(), _pw);
+            var result = await _authHub!.InvokeAsync<LoginResult>("Login", req);
+
+            if (result is not null && !string.IsNullOrWhiteSpace(result.Jwt))
+            {
+                authenticated = true;
+
+                _jwt = result.Jwt;
+                _currentUser = string.IsNullOrWhiteSpace(result.UserName)
+                    ? _user.Trim()
+                    : result.UserName;
+
+                // Clear password once we've successfully authenticated
+                _pw = string.Empty;
+
+                /////////////////// Testing Echo from Observer ////////////////////////
+                // var reply = await _hubConnection.InvokeAsync<string>("Echo", "ping");
+            }
+            else
+            {
+                authenticated = false;
+                // TODO: show invalid-credentials message somewhere in the UI
+            }
+        }
+        catch (Exception ex)
+        {
+            var msg = $"Login error: {ex.Message}";
+            // TODO: surface msg to a toast / log panel
+            authenticated = false;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private async Task DoLogout()
+    {
+        // Optional: close the auth hub connection for now.
+        if (_authHub is not null)
+        {
+            try
+            {
+                await _authHub.StopAsync();
+                await _authHub.DisposeAsync();
+            }
+            catch
+            {
+                // Swallow errors on logout; UI should still transition to logged-out state
+            }
+
+            _authHub = null;
+        }
+
+        authenticated = false;
+        _jwt = string.Empty;
+        _currentUser = string.Empty;
+        _pw = string.Empty;
+
+        // Leave _user as-is so it's easy to log back in as the same name,
+        // or clear it if you prefer a completely blank slate:
+        // _user = string.Empty;
+
+        StateHasChanged();
+    }
+}

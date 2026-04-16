@@ -1,0 +1,64 @@
+﻿{
+  "Servers": [
+    {
+      "Name": "Hunter",
+      "Roles": [ "Admin", "Engineer", "Viewer" ],
+      "Users": [
+        {
+          "UserName": "Admin",
+          "SeedPassword": "Test$12345",
+          "Roles": [ "Admin" ],
+          "Organization": "Solution Hunter Engineering",
+          "FirstName": "System",
+          "LastName": "Administrator",
+          "KnownAs": "Admin",
+          "Email": "admin@InternalSys.com",
+          "PhoneNumber": "(888) 555-1212",
+          "AltPhone": "(888) 555-1212",
+          "City": "Boston",
+          "State": "Massachusetts",
+          "Country": "USA",
+          "ZipCode": "00000",
+          "Question": "In a word, how many 'Exec' accounts are there",
+          "Answer": "none"
+        },
+        {
+          "UserName": "Chuck",
+          "SeedPassword": "Test$12345",
+          "Roles": [ "Admin" ],
+          "Organization": "Solution Hunter Engineering",
+          "FirstName": "Charles",
+          "LastName": "Duncan",
+          "KnownAs": "Chuck",
+          "Email": "cduncan@TheBostonDuncans.com",
+          "PhoneNumber": "(978) 766-9135",
+          "AltPhone": "(888) 555-1212",
+          "City": "Littleton",
+          "State": "Massachusetts",
+          "Country": "USA",
+          "ZipCode": "01460-2222",
+          "Question": "Father's Middle Name",
+          "Answer": "Alonzo"
+        },
+        {
+          "UserName": "John",
+          "SeedPassword": "Test$12345",
+          "Roles": [ "Admin" ],
+          "Organization": "Solution Hunter Engineering",
+          "FirstName": "John",
+          "LastName": "Valdes",
+          "KnownAs": "John",
+          "Email": "tekhausen@gmail.com",
+          "PhoneNumber": "978 735 3258",
+          "AltPhone": "(888) 555-1212",
+          "City": "Amesbury",
+          "State": "Massachusetts",
+          "Country": "USA",
+          "ZipCode": "01913",
+          "Question": "Brother's Nickname",
+          "Answer": "Bobby"
+        }
+      ]
+    }
+  ]
+}
